@@ -1,15 +1,34 @@
 import java.math._
+import java.lang.Long
+import java.lang.Short
 import scala.collection.mutable.ArrayBuffer
+
 class TransactionParser(transactionString : String){
 
-  var stream = transactionString.getBytes()
+  var shortArray = hexToShortArray(transactionString)
   var counter = 0
+  
+  //need this so it doens't mess up
+  implicit def javaToScalaShort(d: java.lang.Short) = d.shortValue
+  
+  //parse a string of hex to an array of Shorts
+  def hexToShortArray(hex : String) : Array[scala.Short]= {
+    var array = new Array[scala.Short](hex.length /2)
+    var count = 0
+    var i = 0
+    while(i < hex.length){
+      array(count) = javaToScalaShort(Short.parseShort(hex.substring(i, i+2), 16))
+      count = count + 1
+      i = i + 2
+    }
+    array
+  }
+	
   def parseTransaction() : Transaction = {
 	  //initialize vars needed to compute transaction hash
 		var transactionVersion = readUnsigned32
-		println("T" + transactionVersion)
 		//INPUTS
-		var inputCount = readVariableLengthInt()
+		var inputCount = readVariableLengthInt
 		var inputs =  new ArrayBuffer[TransactionInput]()
 		for(i <- 0 to inputCount.toInt -1){
 			inputs += parseInput
@@ -20,17 +39,16 @@ class TransactionParser(transactionString : String){
 		for(i <- 0 to outputCount.toInt -1){
 			outputs += parseOutput
 		} 
-		var transactionLockTime = readUnsigned32()
-		return new Transaction(transactionVersion, inputs, outputs, transactionLockTime,
-		    null);
+		var transactionLockTime = readUnsigned32
+		return new Transaction(transactionVersion, inputCount, inputs, outputCount, 
+		    outputs, transactionLockTime)
 	}
 	
 	def parseInput() : TransactionInput = {
-		var transactionHash = readXBytes(32)
+		var transactionHash = readXShorts(32)
 		var transactionIndex = readUnsigned32
 		var scriptLength = readVariableLengthInt
-		//println("In: " + scriptLength)
-		var scriptData = readXBytes(scriptLength)
+		var scriptData = readXShorts(scriptLength)
 		var sequenceNumber = readUnsigned32
 		
 		return new TransactionInput(transactionHash,transactionIndex,scriptLength,
@@ -40,76 +58,57 @@ class TransactionParser(transactionString : String){
 	def parseOutput() : TransactionOutput = {
 		var value = readUnsigned64
 		var scriptLength = readVariableLengthInt
-		//println("Output: " + scriptLength)
-		var script = readXBytes(scriptLength)
+		var script = readXShorts(scriptLength)
 		
 		return new TransactionOutput(value,scriptLength,script)
 	}
 	
 	def readVariableLengthInt() : Long = {
 		var firstByte = readUnsigned8
-		//println(firstByte)
-		if(firstByte < 253){return firstByte.toInt}
-		else if(firstByte == 253){return readUnsigned16}
-		else if(firstByte == 254){return readUnsigned32}
+		if(firstByte < 253){firstByte}
+		else if(firstByte == 253){readUnsigned16}
+		else if(firstByte == 254){readUnsigned32}
 		else if(firstByte == 255){
-		  println("Reached")
 		  return (readUnsigned32 | readUnsigned32<< 32)
 		  } 
-		else{return firstByte.toInt}
+		else{firstByte}
 	}
 	
-	
+	//slightly different method because JVM is terrible with big numbers
 	def readUnsigned64() : Long = {
-		var u_int64 = new Array[Byte](8);
-		for(i <- 0 to 7){ 
-			u_int64(i) = stream(counter)
-			counter = counter + 1
-		}
-		var tmp = new Array[Byte](8)
-		for(i <- 0 to 7){
-		  tmp(i) = u_int64(7-i)
-		}
-		return new BigInteger(tmp).longValue()
+	    (readUnsigned32 | readUnsigned32<< 32)
 	}
 	
 	def readUnsigned32() : Long = {
-		var tmp = new Array[Byte](4)
+		var cc : Long = 0
 		for(i <- 0 to 3){
-			tmp(i) = stream(counter)
-			counter = counter + 1
+		  cc += shortArray(counter) << 8 * i
+		  counter = counter + 1
 		}
-		var value = 
-				((tmp(0) & 0xFF) <<  0) |
-				((tmp(1) & 0xFF) <<  8) |
-				((tmp(2) & 0xFF) << 16) |
-				((tmp(3) & 0xFF) << 24)
-		return value;
+		cc
 	}
 	
-	def readUnsigned16() : Int = {
-		var tmp = new Array[Byte](4)
+	def readUnsigned16() : Long = {
+		var cc : Long = 0
 		for(i <- 0 to 1){
-			tmp(i) = stream(counter)
-			counter = counter +1
+		  cc += shortArray(counter) << 8 * i
+		  counter = counter + 1
 		}
-		var toReturn = (0xFF & tmp(0) | (0xFF & tmp(1)) << 8)
-		return toReturn
+		cc
 	}
 	
-	def readUnsigned8() : Int = {
-		var u_int8 = stream(counter)
+	def readUnsigned8() : Long = {
+		var tmp = shortArray(counter)
 		counter = counter + 1
-		return u_int8 & 0xFF;
+		tmp.toLong
 	}
 	
-	def readXBytes(bytesToRead : Long) : Array[Byte] = {
-		var read = new Array[Byte](bytesToRead.toInt) //it is always a safe conversion
-		for(i <- 0 to bytesToRead.toInt - 1){
-			var tmp = stream(counter)
-			counter = counter + 1
-			read(i) = tmp
-		}
-		return read;
+	def readXShorts(numToRead : Long) : Array[scala.Short] = {
+	  var tmp = new Array[scala.Short](numToRead.toInt)
+	  for(i <- 0 to tmp.length - 1){
+	    tmp(i) = shortArray(counter)
+	    counter = counter + 1
+	  }
+	  tmp
 	}
 }
