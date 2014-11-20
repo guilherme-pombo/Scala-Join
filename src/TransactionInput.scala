@@ -17,11 +17,11 @@ class TransactionInput(transactionHash :Array[Short], transactionIndex : Long,
 	def printInput = {
 	  //Don't know why I have to do this
 	  var b1 = Tools.reverseTwoByTwo(Tools.shortArrayToHexString(transactionHash).reverse)
-	  println("\t Previous Transaction Hash: " + b1)
-	  println("\t Transaction index: " + transactionIndex)
-	  println("\t Script Length: " + scriptLength)
+	  println("\t\t Previous Transaction Hash: " + b1)
+	  println("\t\t Transaction index: " + transactionIndex)
+	  println("\t\t Script Length: " + scriptLength)
 	  var b2 = Tools.shortArrayToHexString(scriptData)
-	  println("\t Script: " + b2)
-	  println("\t Sequence Number: " + sequenceNumber)
+	  println("\t\t Script: " + b2)
+	  println("\t\t Sequence Number: " + sequenceNumber)
 	}
 }

@@ -25,6 +25,7 @@ class TransactionParser(transactionString : String){
   }
 	
   def parseTransaction() : Transaction = {
+    try{
 	  //initialize vars needed to compute transaction hash
 		var transactionVersion = readUnsigned32
 		//INPUTS
@@ -42,6 +43,11 @@ class TransactionParser(transactionString : String){
 		var transactionLockTime = readUnsigned32
 		return new Transaction(transactionVersion, inputCount, inputs, outputCount, 
 		    outputs, transactionLockTime)
+    }
+    catch{
+				case e: Exception => println ("Invalid Hex Transaction")
+									return null
+			}
 	}
 	
 	def parseInput() : TransactionInput = {

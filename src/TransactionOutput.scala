@@ -10,9 +10,9 @@ class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short])
 //	}
 	
 	def printOutput = {
-	  println("\t Value: " + value)
-	  println("\t ScriptLength: " + scriptLength)
+	  println("\t\t Value: " + value)
+	  println("\t\t ScriptLength: " + scriptLength)
 	  var b1 = Tools.shortArrayToHexString(script)
-	  println("\t Script: " + b1)
+	  println("\t\t Script: " + b1)
 	}
 }

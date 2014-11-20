@@ -24,12 +24,18 @@ class Transaction (transactionVersion : Long, inputCount : Long, inputs : ArrayB
 	def printTransaction = {
 	  println("Version: " + transactionVersion)
 	  println("InputCount: " + _inputCount)
+	  var i = 0
 	  for( in <- _inputs){
+	    println("\t Input " + i + ":")
 	    in.printInput
+	    i= i +1
 	  }
+	  i= 0
 	  println("OutputCount: " + _outputCount)
 	  for( out <- _outputs){
+	    println("\t Output " + i + ":")
 	    out.printOutput
+	    i = i + 1
 	  }
 	  println("LockTime: " + transactionLockTime)
 	}
