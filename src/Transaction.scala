@@ -14,11 +14,29 @@ class Transaction (transactionVersion : Long, inputCount : Long, inputs : ArrayB
 //	def getTransactionHash : String = 
 //	  return new String(Base58.byteEncode(SHA256.doubleSha256(arrayBufferToArray(transactionBytes))))
 	
+	def countToHex(n:Long)={
+	  if(n<=15){
+		  "0" + n.toHexString
+	  }
+	  else{
+		  n.toHexString
+	  }
+	}
 	
-	def arrayBufferToArray(a : ArrayBuffer[Byte]) : Array[Byte] = {
-		var xs = new Array[Byte](a.length)
-		a.copyToArray(xs)
-		return xs
+	def getHexString = {
+	  var ver = "01000000"
+	  var inCount = countToHex(_inputCount)
+	  var ret = ""
+	  for(in <- inputs){
+	    ret += in.getHexString
+	  }
+	  var outCount = countToHex(_outputCount)
+	  var ret2 = ""
+	  for(out <- outputs){
+	    ret2 += out.getHexString
+	  }
+	  var lockTime = "00000000"
+	  ver + inCount + ret + outCount + ret2 + lockTime
 	}
 	
 	def printTransaction = {

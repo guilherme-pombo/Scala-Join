@@ -37,8 +37,8 @@ mz6KvC4aoUeo6wSxtiVQTo7FDwPnkp6URG
 STEP 9: GENERATE A RAW TRANSACTION
 
 E.G. bitcoin-cli -regtest createrawtransaction 
-"[{\"txid\":\"b7e23a65e1a1ce7c11893d392dc9aea897e72955cf4db547dc05937a3278b483\",\"vout\":0}]" "{\"mgz4ZBhCEGAYxgnBLqzYqafu5Nhq1e5CMt\":49.99}"
-
+[{\"txid\":\"de336ac490740556d73d168722e4ad23bd498d2beeceb8ac88e5a6211a167841\",\"vout\":0}]" "{\"n4E8fUmsRy8cPz1Zhcz3P7UaBGnjFMNG2y\":49.99}
+\"[{\"txid\":\"txid\",\"vout\":0}]" "{\"receiver\":49.99}\"
 returns: rawTransaction hexString
 
 STEP 10: SIGN RAW TRANSACTION

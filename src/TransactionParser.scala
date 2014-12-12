@@ -7,16 +7,22 @@ class TransactionParser(transactionString : String){
 
   var shortArray = hexToShortArray(transactionString)
   var counter = 0
+  var readingOutput = false
+  var readingInput = false
+  //not great code
+  var inputBuffer = new ArrayBuffer[scala.Short]
+  var outputBuffer = new ArrayBuffer[scala.Short]
   
-  //need this so it doens't mess up
+  //need this so it doesn't mess up
   implicit def javaToScalaShort(d: java.lang.Short) = d.shortValue
+
   
   //parse a string of hex to an array of Shorts
   def hexToShortArray(hex : String) : Array[scala.Short]= {
     var array = new Array[scala.Short](hex.length /2)
     var count = 0
     var i = 0
-    while(i < hex.length){
+    while(i < hex.length-1){
       array(count) = javaToScalaShort(Short.parseShort(hex.substring(i, i+2), 16))
       count = count + 1
       i = i + 2
@@ -49,24 +55,28 @@ class TransactionParser(transactionString : String){
 									return null
 			}
 	}
-	
+  
 	def parseInput() : TransactionInput = {
+		readingInput = true
+		inputBuffer = new ArrayBuffer[scala.Short]
 		var transactionHash = readXShorts(32)
 		var transactionIndex = readUnsigned32
 		var scriptLength = readVariableLengthInt
 		var scriptData = readXShorts(scriptLength)
 		var sequenceNumber = readUnsigned32
-		
+		readingInput = false
 		return new TransactionInput(transactionHash,transactionIndex,scriptLength,
-				scriptData, sequenceNumber)
+				scriptData, sequenceNumber, inputBuffer.toArray)
 	}
 	
 	def parseOutput() : TransactionOutput = {
+		readingOutput = true
+		outputBuffer = new ArrayBuffer[scala.Short]
 		var value = readUnsigned64
 		var scriptLength = readVariableLengthInt
 		var script = readXShorts(scriptLength)
-		
-		return new TransactionOutput(value,scriptLength,script)
+		readingOutput = false
+		return new TransactionOutput(value,scriptLength,script, outputBuffer.toArray)
 	}
 	
 	def readVariableLengthInt() : Long = {
@@ -88,7 +98,14 @@ class TransactionParser(transactionString : String){
 	def readUnsigned32() : Long = {
 		var cc : Long = 0
 		for(i <- 0 to 3){
-		  cc += shortArray(counter) << 8 * i
+		  var tmp = shortArray(counter)
+		  cc += tmp << 8 * i
+		  if(readingInput){
+			inputBuffer += tmp
+		  }
+		  if(readingOutput){
+			outputBuffer += tmp
+		  }
 		  counter = counter + 1
 		}
 		cc
@@ -97,7 +114,14 @@ class TransactionParser(transactionString : String){
 	def readUnsigned16() : Long = {
 		var cc : Long = 0
 		for(i <- 0 to 1){
-		  cc += shortArray(counter) << 8 * i
+		  var tmp = shortArray(counter)
+		  cc += tmp << 8 * i
+		  if(readingInput){
+			inputBuffer += tmp
+		  }
+		  if(readingOutput){
+			outputBuffer += tmp
+		  }
 		  counter = counter + 1
 		}
 		cc
@@ -105,6 +129,12 @@ class TransactionParser(transactionString : String){
 	
 	def readUnsigned8() : Long = {
 		var tmp = shortArray(counter)
+		if(readingInput){
+			inputBuffer += tmp
+		}
+		if(readingOutput){
+			outputBuffer += tmp
+		}
 		counter = counter + 1
 		tmp.toLong
 	}
@@ -115,6 +145,12 @@ class TransactionParser(transactionString : String){
 	    tmp(i) = shortArray(counter)
 	    counter = counter + 1
 	  }
-	  tmp
+	  if(readingInput){
+	    inputBuffer ++= tmp
+	  }
+	  if(readingOutput){
+	    outputBuffer ++= tmp
+	  }
+	  return tmp
 	}
 }
