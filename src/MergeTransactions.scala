@@ -23,7 +23,7 @@ object MergeTransactions {
 	    ""
 	  }
 	  else{
-	    unsigned.getHexString
+	    TransactionToHex.convertToHex(unsigned)
 	  }
 	}
 	
@@ -82,10 +82,10 @@ object MergeTransactions {
 	  //participants can't exceed 252
 	  //Hence, for now there can't be more than 15 (square root of 253) participants
 	  //if each participant is doing a 1-input, 1-output transaction (most common)
-	  if(outputCount*transactions.length>=253 || inputCount*transactions.length>=253){
-	    println("Too many participants")
-	    return null
-	  }
+//	  if(outputCount*transactions.length>=253 || inputCount*transactions.length>=253){
+//	    println("Too many participants")
+//	    return null
+//	  }
 	  
 	  //use these to check for correctness of other transactions in the array
 	  var checkVersion = transactions(0).getTransactionVersion

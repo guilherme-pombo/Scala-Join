@@ -7,6 +7,7 @@ class TransactionInput(transactionHash :Array[Short], transactionIndex : Long,
 	
 	def getPrevHash = transactionHash
 	def getIndex = transactionIndex
+	def getScriptLen = scriptLength
 	def getSeqNum = sequenceNumber
 	
 	def getScript = scriptD
@@ -15,7 +16,6 @@ class TransactionInput(transactionHash :Array[Short], transactionIndex : Long,
 	}
 	
 	def printInput = {
-	  //Don't know why I have to do this
 	  var b1 = Tools.reverseTwoByTwo(Tools.shortArrayToHexString(transactionHash).reverse)
 	  println("\t\t Previous Transaction Hash: " + b1)
 	  println("\t\t Transaction index: " + transactionIndex)

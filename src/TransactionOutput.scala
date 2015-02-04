@@ -4,11 +4,15 @@ class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short],
     data : Array[Short]) {
 	
 	def getScript : Array[Short] = script
-	
 	def getValue = value
-//	def getBytes : Array[Byte] = {
-//	  	return value.toBinaryString.getBytes ++ scriptLength.toBinaryString.getBytes ++ script
-//	}
+	def getScriptLength = scriptLength
+	def getValueAsShort : Array[Short] = {
+	  var ret = new Array[Short](8)
+	  for (i<- 0 to 7){
+	    ret(i) = data(i)
+	  }
+	  ret
+	}
 	
 	def printOutput = {
 	  println("\t\t Value: " + value)
@@ -16,7 +20,6 @@ class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short],
 	  var b1 = Tools.shortArrayToHexString(script)
 	  println("\t\t Script: " + b1)
 	}
-	
 	
 	def getHexString = {
 	  Tools.shortArrayToHexString(data)
