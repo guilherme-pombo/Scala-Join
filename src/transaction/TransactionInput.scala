@@ -1,8 +1,11 @@
-//import crypto._
+	
+package transaction
+
+import misc.Tools
+
 class TransactionInput(transactionHash :Array[Short], transactionIndex : Long, 
     scriptLength : Long, scriptData : Array[Short], sequenceNumber : Long, data : Array[Short]) {
-	
-	//def getTransactionHash : String = return new String(Base58.byteEncode(transactionHash))
+
 	var scriptD = scriptData
 	
 	def getPrevHash = transactionHash
@@ -23,9 +26,5 @@ class TransactionInput(transactionHash :Array[Short], transactionIndex : Long,
 	  var b2 = Tools.shortArrayToHexString(scriptData)
 	  println("\t\t Script: " + b2)
 	  println("\t\t Sequence Number: " + sequenceNumber)
-	}
-	
-	def getHexString = {
-	  Tools.shortArrayToHexString(data)
 	}
 }

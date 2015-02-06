@@ -1,3 +1,7 @@
+package coinJoin
+
+//Just a small class to generate some mock transactions
+//just for quick debugging
 object RandomTransactions {
 
 	// Random generator

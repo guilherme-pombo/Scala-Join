@@ -1,4 +1,7 @@
+package transaction
+
 import java.math._
+import misc.Tools
 
 class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short],
     data : Array[Short]) {
@@ -19,9 +22,5 @@ class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short],
 	  println("\t\t ScriptLength: " + scriptLength)
 	  var b1 = Tools.shortArrayToHexString(script)
 	  println("\t\t Script: " + b1)
-	}
-	
-	def getHexString = {
-	  Tools.shortArrayToHexString(data)
 	}
 }

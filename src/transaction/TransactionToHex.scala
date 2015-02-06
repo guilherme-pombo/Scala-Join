@@ -1,4 +1,11 @@
+package transaction
+
 import java.nio.ByteBuffer
+import misc.Tools
+
+//USE THIS CLASS TO CONVERT SCALA TRANSACTION OBJECTS
+//TO HEXADECIMAL STRINGS REPRESENTING TRANSACTIONS SO THE BITCOIN
+//CLIENT CAN USE IT
 object TransactionToHex {
 
   def convertToHex(tx : Transaction) : String = {

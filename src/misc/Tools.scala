@@ -1,7 +1,8 @@
+package misc
+
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import java.nio.ByteOrder
-import scala.collection.mutable.ArrayBuffer
 object Tools {
 	
 	//convert an array of shorts to an array of BIG ENDIAN bytes

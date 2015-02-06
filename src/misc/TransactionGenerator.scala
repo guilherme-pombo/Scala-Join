@@ -1,8 +1,11 @@
+package misc
+
 import scala.sys.process._
 
 object TransactionGenerator {
 				
-
+	//IGNORE THIS CLASS FOR NOW
+	//IGNORE
    def main(args: Array[String]) {
      generateTransactions
    }

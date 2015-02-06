@@ -1,21 +1,19 @@
+package coinJoin
+
 import scala.collection.mutable.ArrayBuffer
 import java.util.Scanner
+import transaction.TransactionInput
+import transaction.Transaction
+import transaction.TransactionOutput
+import transaction.TransactionToHex
+import transaction.TransactionParser
 
 object MergeTransactions {
 	
-	def mergeUnsigned(input : String) : Transaction = {
-	  var transactions = stringToTransactions(input)
-	  var unsigned = mergeUnsignedTransactions(transactions)
-	  if(unsigned == null){
-	    println("Merging failed") //reasons why it failed are printed out by mergeUnsignedTransactions
-	    unsigned
-	  }
-	  else{
-	    unsigned
-	  }
-	}
-	
-	def mergeUnsignedHex(input : String) : String = {
+	//Takes as input a string with various unsigned transactions
+    //returns the transactions merged in an escrow transaction
+    //returns hexadecimal string
+	def mergeUnsigned(input : String) : String = {
 	  var transactions = stringToTransactions(input)
 	  var unsigned = mergeUnsignedTransactions(transactions)
 	  if(unsigned == null){
@@ -27,31 +25,21 @@ object MergeTransactions {
 	  }
 	}
 	
-	def mergeSigned(input : String) : Transaction= {
+	//Takes as input a string with various Signed transactions
+    //returns the transactions merged in an escrow transaction
+    //returns hexadecimal string
+	def mergeSigned(input : String) : String= {
 	  var transactions = stringToTransactions(input)
 	  var signed = mergeSignedTransactions(transactions)
 	  if(signed == null){
 	    println("Merging failed") //reasons why it failed are printed out by mergeUnsignedTransactions
-	    signed
+	    ""
 	  }
 	  else{
-	    signed
+	    TransactionToHex.convertToHex(signed)
 	  }
 	}
 	
-	//take in as an input several transactions, one per line, inputted as hex strings
-	//returns an array of the parsed transactions
-	def stringToTransactions(input : String) : ArrayBuffer[Transaction] = {
-		var read = new Scanner(input)
-		var transactions =  new ArrayBuffer[Transaction](0)
-		while (read.hasNextLine) {
-			var line = read.nextLine();
-			var parser = new TransactionParser(line)
-			transactions += parser.parseTransaction
-		}
-		read.close
-		transactions
-	}
 	
 	//Check if two inputs are the same
 	def areEqualInputs(i1 : TransactionInput, i2 : TransactionInput) = 
@@ -77,15 +65,6 @@ object MergeTransactions {
 	    outputCount += t.getOutputs.length
 	    inputCount += t.getInputs.length
 	  }
-	  
-	  //FOR NOW: The total number of outputs and inputs times the total number of
-	  //participants can't exceed 252
-	  //Hence, for now there can't be more than 15 (square root of 253) participants
-	  //if each participant is doing a 1-input, 1-output transaction (most common)
-//	  if(outputCount*transactions.length>=253 || inputCount*transactions.length>=253){
-//	    println("Too many participants")
-//	    return null
-//	  }
 	  
 	  //use these to check for correctness of other transactions in the array
 	  var checkVersion = transactions(0).getTransactionVersion
@@ -132,6 +111,8 @@ object MergeTransactions {
 	      }
 	    }
 	  }
+	  //RIGHT NOW I AM NOT RANDOMIZING TO MAKE DEBUGGING EASIER
+	  //NEED TO:
 	  //RANDOMIZE COLLATED INPUTS AND OUTPUTS
 	  finalTx
 	}
@@ -220,57 +201,20 @@ object MergeTransactions {
         }
 	  }
 	  finalTx
-//	  for(t <- transactions){
-//	    if(t.getTransactionLockTime != checkTime){
-//	      println("Incompatible lock times in inputted transactions")
-//	      null //can't merge transactions
-//	    }
-//	    if(t.getTransactionVersion!=checkVersion){
-//	      println("Incompatible transaction version in inputted transactions")
-//	      null //can't merge transactions
-//	    }
-//	    
-//	    
-//	    
-//	    //matching outputs
-//	    for(i<- 0 to t.getOutputs.length - 2){
-//	      if(!areEqualOutputs(t.getOutputs(i), t.getOutputs(i+1))){
-//	         println("Outputs number: " + i + " and : " + (i+1) +"do not match")
-//	         null //can't merge transactions
-//	      }
-//	      else{
-//	        finalTx.addOutput(t.getOutputs(i))
-//	        finalTx.addOutputCount(1)
-//	        if(i == t.getOutputs.length -2){
-//	          finalTx.addOutput(t.getOutputs(i+1))
-//	          finalTx.addOutputCount(1)
-//	        }
-//	      }
-//	    }
-//
-//	    //matching inputs
-//	    for(i<- 0 to t.getInputs.length - 2){
-//	      if(!areEqualInputs(t.getInputs(i), t.getInputs(i+1))){
-//	         println("Inputs number: " + i + " and : " + (i+1) +"do not match")
-//	         null //can't merge transactions
-//	      }
-//	      //inputs match -- take the signature
-//	      else{
-//	    	 //if there is an input script copy it over to the next input
-//	    	 if(t.getInputs(i).getScript.length>0){
-//	    	   t.getInputs(i+1).setScript(t.getInputs(i).getScript)
-//	    	 }
-//	    	 finalTx.addInput(t.getInputs(i))
-//	    	 finalTx.addInputCount(1)
-//		     if(i == t.getInputs.length -2){
-//		       finalTx.addInput(t.getInputs(i+1))
-//		       finalTx.addInputCount(1)
-//		     }
-//	      }
-//	    }
-//	    
-//	  }
-	  
+	}
+	
+	//take in as an input several transactions, one per line, inputed as hex strings
+	//returns an array of the parsed transactions
+	def stringToTransactions(input : String) : ArrayBuffer[Transaction] = {
+		var read = new Scanner(input)
+		var transactions =  new ArrayBuffer[Transaction](0)
+		while (read.hasNextLine) {
+			var line = read.nextLine();
+			var parser = new TransactionParser(line)
+			transactions += parser.parseTransaction
+		}
+		read.close
+		transactions
 	}
 	
 }

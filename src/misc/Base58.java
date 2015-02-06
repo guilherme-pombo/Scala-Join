@@ -1,6 +1,6 @@
+package misc;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
 
 /**
  * Copyright 2011 Google Inc.

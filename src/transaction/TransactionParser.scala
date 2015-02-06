@@ -1,8 +1,11 @@
+package transaction
+
 import java.math._
-import java.lang.Long
-import java.lang.Short
 import scala.collection.mutable.ArrayBuffer
 
+
+//THIS CLASSE PARSES HEXADECIMAL BITCOIN TRANSACTION STRINGS
+//TO SCALA TRANSACTION OBJECTS
 class TransactionParser(transactionString : String){
 
   var shortArray = hexToShortArray(transactionString)
@@ -23,7 +26,7 @@ class TransactionParser(transactionString : String){
     var count = 0
     var i = 0
     while(i < hex.length-1){
-      array(count) = javaToScalaShort(Short.parseShort(hex.substring(i, i+2), 16))
+      array(count) = javaToScalaShort(java.lang.Short.parseShort(hex.substring(i, i+2), 16))
       count = count + 1
       i = i + 2
     }

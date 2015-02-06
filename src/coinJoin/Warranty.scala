@@ -1,17 +1,22 @@
+package coinJoin
+
 import java.io._
 import java.security._
 import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 
+//A class to generate a warranty for the user signed with the
+//server's private key, in case the CoinJoin server tries
+//to steal coins
+//Filenames are mock filenames
 object Warranty {
 
-  //Takes
   
   var pair = generateKeyPair
   var priv = pair.getPrivate
   
   //Take a hexadecimal raw transaction and sign it with the server's private key
-  def getWarranty(tx : String) : Array[Byte] = {
+  def getWarranty(tx : String): Array[Byte] = {
     var dsa = Signature.getInstance("SHA1withDSA", "SUN");
     dsa.initSign(priv);
     var bytes = tx.toByte
