@@ -3,24 +3,27 @@ import java.net._
 import java.io._
 import scala.io._
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.ArrayBuffer
 import coinJoin.MergeTransactions
 
 class Server {
 	
 	//this will store a mapping from IP address to client info
 	var userInfo : HashMap[String, ClientInfo] = new HashMap
+	//this will store the various groups of clients involved in Mixing
+	var transactionGroups = new ArrayBuffer[TransactionGroup]
 	//this will be used to map IP to hexadecimal transactions
 	var userTx : HashMap[String, String] = new HashMap
 	final val MINTX = 10 //minimum amount of users need in a mix to guarantee anonymity 
 	var currIP = ""
 	
-	def start() = {
+	def start = {
 	  val server = new ServerSocket(9999)
 	  while (true) {
 	    //Objects needed for communication
 	    val socket = server.accept
-	    val in = new BufferedSource(socket.getInputStream()).getLines()
-	    val out = new PrintStream(socket.getOutputStream())
+	    val in = new BufferedSource(socket.getInputStream).getLines
+	    val out = new PrintStream(socket.getOutputStream)
 	    
 	    currIP = socket.getInetAddress.toString
 	    var str = in.next
@@ -32,6 +35,7 @@ class Server {
 	      out.flush
 	      socket.close
 	    }
+	    
 	    //Client requesting merged unsigned transaction
 	    if(str.substring(0, 12).equals("ReqUnsigned")){
 	      var ret = ""
@@ -44,12 +48,45 @@ class Server {
 	      out.flush
 	      socket.close
 	    }
+	    
+	    if(str.substring(0,9).equals("signedTx")){
+	      var signedTx = str.split(":")(1)
+	      var everySignedTx = ""
+	      //iterate through the various transactionGroups
+	      var inGroup = false
+	      for(group <- transactionGroups){
+	        if(group.containsIP(currIP)){
+	          inGroup = true
+	          //add the transaction
+	          group.addSignedTx(signedTx)
+	          //if all the necessary transactions for merging have been added
+	          if(group.enoughSignedTxs){
+	            everySignedTx = group.arrayToString
+	          }
+	        }
+	      }
+	      var ret = ""
+	      //Client requested merging a signedTx but is not part of a transaction group
+	      if(!inGroup){
+	        ret = "error"
+	      }
+	      //Successfully add signedTx, but not enough txs yet to merge
+	      if(everySignedTx.equals("")){
+	        ret = "Success1"
+	      }
+	      //enough txs to merge
+	      if(!everySignedTx.equals("")){
+	        ret = "Success2"
+	        var mergeSigned = MergeTransactions.mergeSigned(everySignedTx)
+	        //NEED TO USE BITCOIN NETWORK TO USE MERGESIGNED AND MAKE THE PAYMENT
+	      }
+	      out.println(ret)
+	      out.flush
+	      socket.close
+	    }
+	    	    
 	  }
-	}
-	
-	def checkTransaction(str: String) : String = {
 	  
-	  return ""
 	}
 	
 	def countTransactions(str: String) : String= {
@@ -75,16 +112,22 @@ class Server {
         //merge the unsigned transactions and send them back
         var merge = MergeTransactions.mergeUnsigned(txs)
         val it2 = userInfo.iterator
+        //start new transaction group
+        var tg = new TransactionGroup(merge, "")
         //update every client that had requested a merging with the specified value
         while(it.hasNext){
 	        var index = it.next._1 
 	        var tmp = it.next._2 
 	        if((tmp.btcTotal == btc || tmp.btcTotal == btc + change || tmp.btcTotal == btc - change)
 	            && !tmp.unsigned){
-	          userInfo(index) = new ClientInfo(tmp.btcTotal, tmp.change , tmp.hexTx , true,
+	          var info = new ClientInfo(tmp.btcTotal, tmp.change , tmp.hexTx , true,
 	              merge, false, "")
+	          userInfo(index) = info
+	          tg.putInfo(index, info)
 	        }
         }
+        //add new transaction group to the existing groups
+        transactionGroups += tg
         ret = "Done:" + merge
       }
       else{

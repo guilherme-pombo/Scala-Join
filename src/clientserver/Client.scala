@@ -19,7 +19,7 @@ class Client (_btcTotal : Double, _change : Double, _hexTx : String){
 
   def sendMainInfo{
   	out.println("FirstbtcTotal:" + btcTotal + "-change:" + change + "-Tx:" + hexTx )
-  	out.flush()
+  	out.flush
   	var str = in.next
   	//HAVE TO WAIT BEFORE MERGING IS DONE
   	if(str.substring(0, 5).equals("Wait")){
@@ -36,13 +36,13 @@ class Client (_btcTotal : Double, _change : Double, _hexTx : String){
   	//MERGING HAS BEEN DONE
   	else{
   	  mergedUnsigned = in.next.split(":")(1)
-  	  //Next step
+  	  //Move on to Next step
   	}
   }
   
   def requestUnsigned{
     out.println("ReqUnsigned" )
-  	out.flush()
+  	out.flush
   	var str = in.next
   	//HAVE TO WAIT BEFORE MERGING IS DONE
   	if(str.substring(0, 5).equals("Wait")){
@@ -58,15 +58,23 @@ class Client (_btcTotal : Double, _change : Double, _hexTx : String){
   	}
   	else{
   	  mergedUnsigned = in.next.split(":")(1)
-  	  //Next step
-  	  
+  	  //Move on to Next step
   	}
   }
   
-  def sendUnsignedTx{
-    out.println("SecondTx:" + hexTx)
-  	out.flush()
+  def sendSignedTx(signedTx: String){
+    out.println("signedTx:" + signedTx)
+  	out.flush
+  	var str = in.next
+  	if(str.equals("error")){
+  	  println("You can't be doing that yet. You haven't requested Mixing yet")
+  	}
+    if(str.equals("Success1")){
+      println("Signed Transactions successfully added for mixing. Please wait...")
+    }
+    if(str.equals("Success2")){
+      println("Transaction successfully mixed. Bitcoin payment should have been made.")
+    }
   }
-  
     
 }
