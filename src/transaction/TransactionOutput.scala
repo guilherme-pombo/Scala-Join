@@ -23,4 +23,9 @@ class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short],
 	  var b1 = Tools.shortArrayToHexString(script)
 	  println("\t\t Script: " + b1)
 	}
+	
+	//returns a string which can be used to compare outputs
+	def getComparableString : String = {
+	  "" + value + Tools.shortArrayToHexString(script)
+	}
 }

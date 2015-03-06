@@ -43,11 +43,11 @@ object MergeTransactions {
 	
 	//Check if two inputs are the same
 	def areEqualInputs(i1 : TransactionInput, i2 : TransactionInput) = 
-	  ((i1.getPrevHash.deep == i2.getPrevHash.deep) && (i1.getIndex == i2.getIndex))  && (i1.getSeqNum == i2.getSeqNum)
+	  i1.getComparableString.equals(i2.getComparableString)
 	
 	//Check if two outputs are the same
 	def areEqualOutputs(o1 : TransactionOutput, o2 : TransactionOutput) = 
-	  ((o1.getValue == o2.getValue) && (o1.getScript.deep == o2.getScript.deep))
+	  o1.getComparableString.equals(o2.getComparableString)
 	  
 	//merge raw transactions sent in from the users
 	//send back for signing and approval
@@ -149,17 +149,16 @@ object MergeTransactions {
 	      println("Incompatible outputs on transactions " + i + " and " +  (i+1))
 	      return null
 	    }
-	    var c = 0
-	    for {
-            out1 <- tx1.getOutputs
-            out2 <- tx2.getOutputs
-        }{
+	    var outs1 = tx1.getOutputs
+	    var outs2 = tx2.getOutputs
+	    for(j <- 0 to outs1.length -1){
+	      var out1 = outs1(j)
+	      var out2 = outs2(j)
           if(!areEqualOutputs(out1, out2)){
-	         println("Outputs number: " + c + "do not match")
+	         println("Outputs number: " + j + " do not match")
 	         return null //can't merge transactions
 	      }
           else{
-            c= c+1
 	        finalTx.addOutput(out1)
 	        finalTx.addOutputCount(1)
 	        //in the last iteration add the second output as well
@@ -175,13 +174,13 @@ object MergeTransactions {
 	      println("Incompatible input on transactions " + i + " and " +  (i+1))
 	      return null
 	    }
-	    c = 0
-	    for {
-            in1 <- tx1.getInputs
-            in2 <- tx2.getInputs
-        }{
+	    var ins1 = tx1.getInputs
+	    var ins2 = tx2.getInputs
+	    for(j <- 0 to outs1.length -1){
+	      var in1 = ins1(j)
+	      var in2 = ins2(j)
           if(!areEqualInputs(in1, in2)){
-	         println("Inputs number: " + c + "do not match")
+	         println("Inputs number: " + j + " do not match")
 	         return null //can't merge transactions
 	      }
           else{
@@ -189,7 +188,6 @@ object MergeTransactions {
 //	    	if(in1.getScript.length>0){
 //	    	  tx2.getInputs(c).setScript(tx1.getInputs(c).getScript)
 //	    	}
-	    	c= c+1
 	        finalTx.addInput(in1)
 	        finalTx.addInputCount(1)
 	        //in the last iteration add the second input as well

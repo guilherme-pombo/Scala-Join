@@ -27,4 +27,10 @@ class TransactionInput(transactionHash :Array[Short], transactionIndex : Long,
 	  println("\t\t Script: " + b2)
 	  println("\t\t Sequence Number: " + sequenceNumber)
 	}
+	
+	//string used to check if two different inputs are the same
+	def getComparableString : String = {
+	  var b1 = Tools.reverseTwoByTwo(Tools.shortArrayToHexString(transactionHash).reverse)
+	  "" + b1 + transactionIndex + sequenceNumber
+	}
 }
