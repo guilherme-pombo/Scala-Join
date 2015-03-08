@@ -15,6 +15,7 @@ object Wallet {
    //generate a bitcoin address --- NOT A PUBLIC KEY
    //creates a private key in the wallet for the address
    def generateAddress : String = {
+     //println("bitcoin-cli -regtest getnewaddress")
      v("bitcoin-cli -regtest getnewaddress")
    }
    
@@ -30,20 +31,23 @@ object Wallet {
    //Because we are running tests in RegTest server we can give any address
    //as much BTC as we want. Give address, X btc.
    //Return the txId
-   def giveAddressBTC(address : String, btc : Int): String = {
-     v("bitcoin-cli -regtest sendtoaddress " + address + " " + btc)
+   def giveAddressBTC(address : String, btc : Double): String = {
+     //println("bitcoin-cli -regtest sendtoaddress " + address.stripLineEnd + " " + btc)
+     v("bitcoin-cli -regtest sendtoaddress " + address.stripLineEnd + " " + btc)
    }
    
    //get Raw transaction info for given txId
    def getRawTransaction(txId : String) : String = {
-     v("bitcoin-cli -regtest getrawtransaction " + txId + " 1")
+     //println("bitcoin-cli -regtest getrawtransaction " + txId.stripLineEnd + " 1")
+     v("bitcoin-cli -regtest getrawtransaction " + txId.stripLineEnd + " 1")
    }
    
    //create a raw transaction and return it's hexadecimal representation
    def createRawTransaction(txId : String, vout : Int, 
-       receiver :String, amount : Int) : String = {
-     var arg1 = "\"[{\"txid\":\""+ txId + "\",\"vout\":" + vout + "}]\" "
-	 var arg2 = "\"{\""+ receiver+ "\":" + amount + "}\""
+       receiver :String, amount : Double) : String = {
+	 val arg1 = "\"[{\\\"txid\\\":\\\""+ txId.stripLineEnd +"\\\",\\\"vout\\\":" + vout + "}]\""
+	 val arg2 = "\"{\\\""+ receiver.stripLineEnd+ "\\\":" + amount + "}\""
+	 //println("bitcoin-cli -regtest createrawtransaction " + arg1 + " " + arg2)
 	 v("bitcoin-cli -regtest createrawtransaction " + arg1 + " " + arg2)
    }
    
@@ -52,15 +56,21 @@ object Wallet {
      v("bitcoin-cli -regtest decoderawtransaction " + hex)
    }
    
-   def getScriptPubKey() {
-     //need to do
+   //takes in a decoded raw transaction and returns the scriptPubKey
+   def getScriptPubKey(decodedTx : String) : String = {
+     var split = decodedTx.split("scriptPubKey")
+	 split = split(1).split("hex")
+	 split = split(1).split(",")
+	 split(0).substring(5,split(0).length - 1)
    }
    
    //We need to provide the txId, vout and scriptpubkey of the inputs we're signing 
    //so our offline wallet knows which of its keys to use for the signature
    def signrawtransaction(hex : String, txId : String, vout: Int, spk : String) : String = {
-     var arg1 = "\"[{\"txid\":\""+ txId + "\",\"vout\":" + vout + "\",\"scriptpubkey\":\"" + spk + "\"}]\" "
-     v("bitcoin-cli -regtest signrawtransaction  " + hex + " " + arg1)
+     var arg1 = "\"[{\\\"txid\\\":\\\""+ txId.stripLineEnd + "\\\",\\\"vout\\\":" + 
+     vout + ",\\\"scriptPubKey\\\":\\\"" + spk.stripLineEnd + "\\\"}]\""
+     //println("bitcoin-cli -regtest signrawtransaction  " + hex.stripLineEnd + " " + arg1)
+     v("bitcoin-cli -regtest signrawtransaction  " + hex.stripLineEnd + " " + arg1)
    }
    
    //Sends a signed transaction to the network
@@ -73,4 +83,5 @@ object Wallet {
    def listTransactions() : String = {
       v("bitcoind listtransactions \"\" 1")
    }
+   
 }
