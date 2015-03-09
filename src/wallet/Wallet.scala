@@ -64,6 +64,15 @@ object Wallet {
 	 split(0).substring(5,split(0).length - 1)
    }
    
+   //Take the result of calling signtransaction and return the Hex
+   //representing the signed transaction
+   def getHexSigned(signed : String) : String = {
+     var split = signed.split("hex")
+	 split = split(1).split(",")
+	 split = split(0).split(",")
+	 split(0).substring(5,split(0).length - 1)
+   }
+   
    //We need to provide the txId, vout and scriptpubkey of the inputs we're signing 
    //so our offline wallet knows which of its keys to use for the signature
    def signrawtransaction(hex : String, txId : String, vout: Int, spk : String) : String = {
