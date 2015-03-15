@@ -1,4 +1,4 @@
-package analysis
+package parser.analysis
 
 object OPCodes {
 	

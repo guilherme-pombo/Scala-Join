@@ -1,9 +1,7 @@
-package analysis
+package parser.analysis
 
-import crypto._
-import parsing._
-import parsing.MemoryParser
-//import collection.mutable.HashMap
+import parser.parsing._
+import misc.Base58
 import scala.collection.mutable.ArrayBuffer
 import java.util.HashMap;
 import java.io.File
@@ -32,13 +30,13 @@ class TransactionHistory {
 					if(parent!= null){
 						var prevout = parent.getOutputs
 						for(o2 <- prevout){
-							//println("Out1: " + o2.getScript.length)
+							println("Out1: " + o2.getScript.length)
 							senders += "\t" + getReadableAddress(readOutputScript(o2.getScript)) + "\n"
 						}
 					}
 				}
 				for(out <- outputs){
-					//println("Out2: " + out.getScript.length)
+					println("Out2: " + out.getScript.length)
 					receivers += "\t" + getReadableAddress(readOutputScript(out.getScript)) + "\n"
 				}
 				println(senders+receivers)
@@ -51,7 +49,7 @@ class TransactionHistory {
 	
 	def buildBlockChain = {
 		//Need to allocate extra heap space, -Xmx1250m
-		var p = new MemoryParser("C:/Users/Pombo/Desktop/FYP/BlockChain Parser/blk00000.dat")
+		var p = new MemoryParser("C:/Users/Pombo/AppData/Roaming/Bitcoin/regtest/blocks/blk00000.dat")
 		var blocks = p.parseFile
 		var tmp = ""
 		for(b <- blocks){

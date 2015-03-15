@@ -1,7 +1,7 @@
-package analysis
+package parser.analysis
 
-import crypto.RIPEMD160
-import crypto.SHA256
+import parser.crypto.RIPEMD160
+import parser.crypto.SHA256
 
 object Addresses {
   

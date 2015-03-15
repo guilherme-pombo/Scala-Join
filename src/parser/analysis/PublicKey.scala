@@ -1,4 +1,4 @@
-package analysis
+package parser.analysis
 
 class PublicKey(_key : Array[Byte], _isRipeMD160 : Boolean){
 	

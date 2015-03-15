@@ -1,4 +1,4 @@
-package crypto
+package parser.crypto
 
 import java.security.MessageDigest
 
