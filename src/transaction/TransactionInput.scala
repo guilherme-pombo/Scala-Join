@@ -14,11 +14,16 @@ class TransactionInput(transactionHash :Array[Short], transactionIndex : Long,
 	def getSeqNum = sequenceNumber
 	
 	def getScript = scriptD
-	def setScript(script : Array[Short]) = {
+	def setScript(script : Array[Short]){
 	  scriptD = script
 	}
 	
-	def printInput = {
+	//add a scriptSig to the current scriptSig
+	def addScript(script : Array[Short]){
+	  scriptD ++ script
+	}
+	
+	def printInput{
 	  var b1 = Tools.reverseTwoByTwo(Tools.shortArrayToHexString(transactionHash).reverse)
 	  println("\t\t Previous Transaction Hash: " + b1)
 	  println("\t\t Transaction index: " + transactionIndex)

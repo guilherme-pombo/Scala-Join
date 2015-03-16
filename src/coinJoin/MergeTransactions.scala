@@ -126,12 +126,10 @@ object MergeTransactions {
 	    println("No transactions inputted")
 	    return null
 	  }
-	  var checkTransaction = transactions(0) //first transaction serves as checker
-	  var checkVersion = checkTransaction.getTransactionVersion
-	  var checkTime = checkTransaction.getTransactionLockTime
-	  //this transaction will have the collated inputs and outputs
-	  var finalTx = new Transaction(checkVersion, 0, new ArrayBuffer[TransactionInput](),
-	     0, new ArrayBuffer[TransactionOutput](), checkTime)
+	  //this transaction will have the collated scriptSigs
+	  var finalTx = transactions(0) //first transaction serves as checker
+	  var checkVersion = finalTx.getTransactionVersion
+	  var checkTime = finalTx.getTransactionLockTime
 	  for(i<- 0 to transactions.length-2){
 	    var tx1 = transactions(i)
 	    var tx2 = transactions(i+1)
@@ -151,21 +149,13 @@ object MergeTransactions {
 	    }
 	    var outs1 = tx1.getOutputs
 	    var outs2 = tx2.getOutputs
+	    //VERIFY IF ALL OUTPUTS MATCH
 	    for(j <- 0 to outs1.length -1){
 	      var out1 = outs1(j)
 	      var out2 = outs2(j)
           if(!areEqualOutputs(out1, out2)){
 	         println("Outputs number: " + j + " do not match")
 	         return null //can't merge transactions
-	      }
-          else{
-	        finalTx.addOutput(out1)
-	        finalTx.addOutputCount(1)
-	        //in the last iteration add the second output as well
-	        if(i == transactions.length-2){
-	          finalTx.addOutput(out2)
-	          finalTx.addOutputCount(1)
-	        }
 	      }
         }
         //Check inputs
@@ -176,24 +166,25 @@ object MergeTransactions {
 	    }
 	    var ins1 = tx1.getInputs
 	    var ins2 = tx2.getInputs
-	    for(j <- 0 to outs1.length -1){
+	    //VERIFY IF ALL INPUTS MATCH
+	    for(j <- 0 to ins1.length -1){
 	      var in1 = ins1(j)
 	      var in2 = ins2(j)
           if(!areEqualInputs(in1, in2)){
 	         println("Inputs number: " + j + " do not match")
 	         return null //can't merge transactions
 	      }
+	      //COLLATE ALL SCRIPTSIGS
           else{
-//          //if there is an input script copy it over to the next input
-//	    	if(in1.getScript.length>0){
-//	    	  tx2.getInputs(c).setScript(tx1.getInputs(c).getScript)
-//	    	}
-	        finalTx.addInput(in1)
-	        finalTx.addInputCount(1)
-	        //in the last iteration add the second input as well
+            //if there is an input script copy it over to the next input
+	    	if(in1.getScript.length>0){
+	    	  finalTx.getInputs(j).addScript(in1.getScript)
+	    	}
+	        //in the last iteration add the second input's scriptSig as well
 	        if(i == transactions.length-2){
-	          finalTx.addInput(in2)
-	          finalTx.addInputCount(1)
+	          if(in2.getScript.length>0){
+	    	  finalTx.getInputs(j).addScript(in2.getScript)
+	          }
 	        }
 	      }
         }

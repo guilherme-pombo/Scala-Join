@@ -1,6 +1,7 @@
-package parsing
+package parser.parsing
 import scala.collection.mutable.ArrayBuffer
-import crypto._
+import misc.Base58
+import parser.crypto.SHA256
 
 class Block(magicID : Long, blockLength : Long, version : Long, prevHash : Array[Byte],
 			merkleRoot : Array[Byte], timeStamp : Long, targetDifficulty : Long, 

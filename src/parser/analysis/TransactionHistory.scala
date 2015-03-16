@@ -25,25 +25,27 @@ class TransactionHistory {
 				var outputs = t.getOutputs
 				for(in <- inputs){
 					var parentTransactionHash = in.getTransactionHash
-					//println(parentTransactionHash)
+					println(parentTransactionHash)
 					var parent = transactionChain.get(parentTransactionHash)
 					if(parent!= null){
 						var prevout = parent.getOutputs
 						for(o2 <- prevout){
-							println("Out1: " + o2.getScript.length)
+							//println("Out1: " + o2.getScript.length)
 							senders += "\t" + getReadableAddress(readOutputScript(o2.getScript)) + "\n"
+							print(senders)
 						}
 					}
 				}
 				for(out <- outputs){
-					println("Out2: " + out.getScript.length)
+					//println("Out2: " + out.getScript.length)
 					receivers += "\t" + getReadableAddress(readOutputScript(out.getScript)) + "\n"
+					print(receivers)
 				}
 				println(senders+receivers)
 			}
 			//println(lastBlock.getPrevBlockHash)
-			lastBlock = blockChain.get(lastBlock.getPrevBlockHash)
 			
+			lastBlock = blockChain.get(lastBlock.getPrevBlockHash)
 		}
 	}
 	
@@ -51,15 +53,14 @@ class TransactionHistory {
 		//Need to allocate extra heap space, -Xmx1250m
 		var p = new MemoryParser("C:/Users/Pombo/AppData/Roaming/Bitcoin/regtest/blocks/blk00000.dat")
 		var blocks = p.parseFile
-		var tmp = ""
 		for(b <- blocks){
-			blockChain.put(b.getBlockHash,b)
-			lastBlockHash = b.getBlockHash
-			tmp += lastBlockHash + "\n"
-			var transactions = b.getTransactions
-			for(t <- transactions){
-				transactionChain.put(t.getTransactionHash,t)
-			}
+		  //if it is not a core block transaction
+		  blockChain.put(b.getBlockHash,b)
+		  lastBlockHash = b.getBlockHash
+		  var transactions = b.getTransactions
+	      for(t <- transactions){
+		    transactionChain.put(t.getTransactionHash,t)
+		  }
 		}
 		//writeToFile("C:/Users/Pombo/Desktop/FYP/test3.txt", tmp)
 	}
@@ -87,6 +88,7 @@ class TransactionHistory {
 	def readOutputScript(script : Array[Byte]) : PublicKey  = {
 		var isRipeMD160 = false
 		var publicKey = new Array[Byte](1)
+		//println(script.length)
 		if(script.length<MAX_REASONABLE_SCRIPT_LENGTH){
 		  if(script.length == 67 && script(0) == 65 && script(66)== OPCodes.OP_CHECKSIG){
 			  publicKey = new Array[Byte](65)
@@ -129,6 +131,7 @@ class TransactionHistory {
 						  }
 						  break = true
 					  }
+					  i = i +1
 				  }
 			  }
 		  }

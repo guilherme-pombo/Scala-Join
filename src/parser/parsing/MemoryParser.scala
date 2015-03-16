@@ -1,14 +1,17 @@
-package parsing
+package parser.parsing
 
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer
-import crypto._
 import java.math._
 import java.nio.file.Files
 import java.nio.file.Paths
+
+//VERY IMPORTANT. REMEBER MAGIC IDS
+//Regular net: 0xD9B4BEF9
+//Testnet: 0xDAB5BFFA
 
 //For this to run need to allocate more heap space
 //Usually passing in -Xmx1250m is enough
@@ -29,14 +32,26 @@ class MemoryParser(filename : String) {
 	def parseFile() :ArrayBuffer[Block] = {
 		var toReturn = new ArrayBuffer[Block]()
 		while(counter < stream.length){
-		  toReturn += parseBlock
+		  var block = parseBlock
+		  if(block != null){
+			  toReturn += parseBlock
+		  }
 		}
+		toReturn.remove(toReturn.length-1)
 		return toReturn
 	}
 	
 	def parseBlock() : Block = {
-		var magicID = findMagicID()
-		//println(magicID == 0xD9B4BEF9)
+		var magicID : Long = 0
+		try{
+		  magicID = findMagicID
+		}catch{
+	      case e: ArrayIndexOutOfBoundsException => magicID = 0
+		}
+		if(magicID == 0){
+		  return null //break
+		}
+		//println(magicID == 0xDAB5BFFA)
 		//println(counter)
 		var blockLength = readUnsigned32
 		//initialize vars needed to compute blockHash
@@ -62,11 +77,13 @@ class MemoryParser(filename : String) {
 		    targetDifficulty, nonce, transactions, blockHeader)
 	}
 	
+	//Regular net: 0xD9B4BEF9
+	//Testnet: 0xDAB5BFFA
 	def findMagicID() : Long = {
 		var ID : Long = 0
-		while(ID != 0xD9B4BEF9){
+		while(ID != 0xDAB5BFFA){
 			ID = readUnsigned32
-			if(ID != 0xD9B4BEF9){
+			if(ID != 0xDAB5BFFA){
 				counter = counter - 3
 			}
 		}

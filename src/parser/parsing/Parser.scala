@@ -1,11 +1,10 @@
-package parsing
+package parser.parsing
 
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import scala.collection.mutable.ArrayBuffer
-import crypto._
 import java.math._
 
 class Parser(filename : String) {

@@ -1,8 +1,13 @@
-package parsing
+package parser.parsing
 object Tesst {
 	def main(args: Array[String]) {
-      var p = new MemoryParser("C:/Users/Pombo/Desktop/FYP/BlockChain Parser/blk00093.dat");
+      var p = new MemoryParser("C:/Users/Pombo/AppData/Roaming/Bitcoin/regtest/blocks/blk00000.dat");
       var blocks = p.parseFile
-      println("Done")
+      for(b <- blocks){
+        var txs = b.getTransactions
+        for(t <- txs){
+          print(t.getString)
+        }
+      }
     }
 }
