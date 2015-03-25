@@ -12,6 +12,30 @@ object Wallet {
    def p(s : String) = scala.sys.process.stringToProcess("cmd /C " + s)
    def v(s: String) = scala.sys.process.stringToProcess("cmd /C " + s).!!
    
+   //Get how many Bitcoins are available in the blockchain to spend
+   def getBlockChainBalance : Float = {
+     v("bitcoin-cli -regtest getbalance").toFloat
+   }
+   
+   def generateUsableBlock{
+     p("bitcoin-cli -regtest setgenerate true 101")
+   }
+   
+   //Generate 1 block to confirm the most recent transaction
+   def confirmTransaction{
+     p("bitcoin-cli -regtest setgenerate true 1")
+   }
+   
+   //List most recent confirmed transaction
+   def listTransaction(): String = {
+     v("bitcoin-cli -regtest setgenerate true \"\" 1")
+   }
+   
+   //List unspent Inputs and Outputs
+   def listUnspent() : String = {
+     v("bitcoin-cli -regtest listunspent")
+   }
+   
    //generate a bitcoin address --- NOT A PUBLIC KEY
    //creates a private key in the wallet for the address
    def generateAddress : String = {

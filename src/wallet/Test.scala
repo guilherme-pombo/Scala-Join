@@ -5,13 +5,35 @@ import scala.collection.mutable.ArrayBuffer
 object Test {
 
   def main(args: Array[String]) {
-    test2Send(10)
+    test1Send
   }
   
   //A few sample tests bellow
-  //Note, these tests will simply output the result of using CoinJoin
-  //They do not send the CoinJoin transaction to the bitcoin network
-  //This, however could easily be done by using SendTransaction on the output of the test
+  
+  //In this case we do a simple regular raw transaction, to add noise to the blockChain
+  //No CoinJoin
+  //Just an example to illustrate how a simple non-joint transaction works
+  def regularTransaction{
+    //Generate an address
+    var sender = Wallet.generateAddress
+    //Give it 0.5 Bitcoins
+    var txId = Wallet.giveAddressBTC(sender, 0.5)
+    //Confirm given bitcoins by generating a block
+    Wallet.confirmTransaction
+    //Get txId and ScriptPubKey
+    var decoded = Wallet.getRawTransaction(txId)
+    var spk = Wallet.getScriptPubKey(decoded)
+    //Generate an address for the receiver
+    var receiver = Wallet.generateAddress
+    //Create a raw transaction
+    var rawTx = Wallet.createRawTransaction(txId, 0, receiver, 0.5)
+    //Sign raw transaction
+    var signedTx = Wallet.getHexSigned(Wallet.signrawtransaction(rawTx, txId , 0, spk ))
+    //Send signed raw transaction
+    Wallet.sendTransaction(signedTx)
+    //Confirm most recent transaction
+    Wallet.confirmTransaction
+  }
   
   //Test1: Simplest test. Merges two simple transactions, signs the merged
   //transaction and then merges the signed transactions.
@@ -20,13 +42,14 @@ object Test {
     var mergeUnsigned = ""
     var signInfo = new ArrayBuffer[SignInfo]
     for(i<- 0 to 1){
-      var ad1 = Wallet.generateAddress
-	  var txId = Wallet.giveAddressBTC(ad1, 50)
+      var sender = Wallet.generateAddress
+	  var txId = Wallet.giveAddressBTC(sender, 0.5)
+	  Wallet.confirmTransaction
 	  var decoded = Wallet.getRawTransaction(txId)
 	  var spk = Wallet.getScriptPubKey(decoded)
-	  var ad2 = Wallet.generateAddress
+	  var receiver = Wallet.generateAddress
 	  signInfo += new SignInfo(txId, 0, spk)
-	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, ad2, 50)
+	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, receiver, 0.5)
     }
     var mergedTx = MergeTransactions.mergeUnsigned(mergeUnsigned)
     var mergedSigned = ""
@@ -34,9 +57,8 @@ object Test {
       var info = signInfo(i)
       mergedSigned += Wallet.getHexSigned(Wallet.signrawtransaction(mergedTx, info.txId , 0, info.spk )) + "\n"
     }
-    print(mergedSigned)
     var finalTx = MergeTransactions.mergeSigned(mergedSigned)
-    println(finalTx)
+    println("FinalTx: " + finalTx)
   }
   
   //Same as test1 but sends the finalTx
@@ -44,13 +66,14 @@ object Test {
     var mergeUnsigned = ""
     var signInfo = new ArrayBuffer[SignInfo]
     for(i<- 0 to 1){
-      var ad1 = Wallet.generateAddress
-	  var txId = Wallet.giveAddressBTC(ad1, 50)
+      var sender = Wallet.generateAddress
+	  var txId = Wallet.giveAddressBTC(sender, 0.5)
+	  Wallet.confirmTransaction
 	  var decoded = Wallet.getRawTransaction(txId)
 	  var spk = Wallet.getScriptPubKey(decoded)
-	  var ad2 = Wallet.generateAddress
+	  var receiver = Wallet.generateAddress
 	  signInfo += new SignInfo(txId, 0, spk)
-	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, ad2, 50)
+	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, receiver, 0.5)
     }
     var mergedTx = MergeTransactions.mergeUnsigned(mergeUnsigned)
     var mergedSigned = ""
@@ -59,8 +82,9 @@ object Test {
       mergedSigned += Wallet.getHexSigned(Wallet.signrawtransaction(mergedTx, info.txId , 0, info.spk )) + "\n"
     }
     var finalTx = MergeTransactions.mergeSigned(mergedSigned)
-    println(finalTx)
     Wallet.sendTransaction(finalTx)
+    //Confirm most recent transaction
+    Wallet.confirmTransaction
   } 
   
   //Test2: 2nd simplest test. Merges N simple transactions, signs the merged
@@ -70,13 +94,14 @@ object Test {
     var mergeUnsigned = ""
     var signInfo = new ArrayBuffer[SignInfo]
     for(i<- 0 to transactionsToSign - 1){
-      var ad1 = Wallet.generateAddress
-	  var txId = Wallet.giveAddressBTC(ad1, 50)
+      var sender = Wallet.generateAddress
+	  var txId = Wallet.giveAddressBTC(sender, 0.5)
+	  Wallet.confirmTransaction
 	  var decoded = Wallet.getRawTransaction(txId)
 	  var spk = Wallet.getScriptPubKey(decoded)
-	  var ad2 = Wallet.generateAddress
+	  var receiver = Wallet.generateAddress
 	  signInfo += new SignInfo(txId, 0, spk)
-	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, ad2, 50)
+	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, receiver, 0.5)
     }
     var mergedTx = MergeTransactions.mergeUnsigned(mergeUnsigned)
     var mergedSigned = ""
@@ -93,13 +118,14 @@ object Test {
     var mergeUnsigned = ""
     var signInfo = new ArrayBuffer[SignInfo]
     for(i<- 0 to transactionsToSign - 1){
-      var ad1 = Wallet.generateAddress
-	  var txId = Wallet.giveAddressBTC(ad1, 50)
+      var sender = Wallet.generateAddress
+	  var txId = Wallet.giveAddressBTC(sender, 0.5)
+	  Wallet.confirmTransaction
 	  var decoded = Wallet.getRawTransaction(txId)
 	  var spk = Wallet.getScriptPubKey(decoded)
-	  var ad2 = Wallet.generateAddress
+	  var receiver = Wallet.generateAddress
 	  signInfo += new SignInfo(txId, 0, spk)
-	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, ad2, 50)
+	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, receiver, 0.5)
     }
     var mergedTx = MergeTransactions.mergeUnsigned(mergeUnsigned)
     var mergedSigned = ""
@@ -108,21 +134,23 @@ object Test {
       mergedSigned += Wallet.getHexSigned(Wallet.signrawtransaction(mergedTx, info.txId , 0, info.spk )) + "\n"
     }
     var finalTx = MergeTransactions.mergeSigned(mergedSigned)
-    println(finalTx)
     Wallet.sendTransaction(finalTx)
+    //Confirm most recent transaction
+    Wallet.confirmTransaction
   }
   
   def test3(value: Long) {
     var mergeUnsigned = ""
     var signInfo = new ArrayBuffer[SignInfo]
     for(i<- 0 to 1){
-      var ad1 = Wallet.generateAddress
-	  var txId = Wallet.giveAddressBTC(ad1, value)
+      var sender = Wallet.generateAddress
+	  var txId = Wallet.giveAddressBTC(sender, value)
+	  Wallet.confirmTransaction
 	  var decoded = Wallet.getRawTransaction(txId)
 	  var spk = Wallet.getScriptPubKey(decoded)
-	  var ad2 = Wallet.generateAddress
+	  var receiver = Wallet.generateAddress
 	  signInfo += new SignInfo(txId, 0, spk)
-	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, ad2, value)
+	  mergeUnsigned += Wallet.createRawTransaction(txId, 0, receiver, value)
     }
     var mergedTx = MergeTransactions.mergeUnsigned(mergeUnsigned)
     var mergedSigned = ""

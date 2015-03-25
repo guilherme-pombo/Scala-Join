@@ -175,18 +175,18 @@ object MergeTransactions {
 	         return null //can't merge transactions
 	      }
 	      //COLLATE ALL SCRIPTSIGS
-          else{
-            //if there is an input script copy it over to the next input
-	    	if(in1.getScript.length>0){
-	    	  finalTx.getInputs(j).addScript(in1.getScript)
-	    	}
-	        //in the last iteration add the second input's scriptSig as well
-	        if(i == transactions.length-2){
-	          if(in2.getScript.length>0){
-	    	  finalTx.getInputs(j).addScript(in2.getScript)
-	          }
-	        }
-	      }
+//          else{
+//            //if there is an input script copy it over to the next input
+//	    	if(in1.getScript.length>0){
+//	    	  finalTx.getInputs(j).addScript(in1.getScript)
+//	    	}
+//	        //in the last iteration add the second input's scriptSig as well
+//	        if(i == transactions.length-2){
+//	          if(in2.getScript.length>0){
+//	    	  finalTx.getInputs(j).addScript(in2.getScript)
+//	          }
+//	        }
+//	      }
         }
 	  }
 	  finalTx
