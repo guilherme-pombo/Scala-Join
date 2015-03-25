@@ -3,12 +3,14 @@ package transaction
 import java.math._
 import misc.Tools
 
-class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short],
+class TransactionOutput(_value : Long, scriptLength :Long, script : Array[Short],
     data : Array[Short]) {
 	
+	var value = _value
 	def getScript : Array[Short] = script
 	def getValue = value
 	def getScriptLength = scriptLength
+	def getDataArray = data
 	def getValueAsShort : Array[Short] = {
 	  var ret = new Array[Short](8)
 	  for (i<- 0 to 7){
@@ -16,7 +18,7 @@ class TransactionOutput(value : Long, scriptLength :Long, script : Array[Short],
 	  }
 	  ret
 	}
-	
+	def addToValue(add : Long){ value += add}
 	def printOutput = {
 	  println("\t\t Value: " + value)
 	  println("\t\t ScriptLength: " + scriptLength)

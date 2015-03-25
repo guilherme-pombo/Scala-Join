@@ -14,8 +14,14 @@ class Transaction (transactionVersion : Long, inputCount : Long, inputs : ArrayB
 	def getOutputs : ArrayBuffer[TransactionOutput] = return _outputs
 	def getTransactionVersion = transactionVersion
 	def getTransactionLockTime = transactionLockTime
-	def addOutput(out : TransactionOutput) = {_outputs += out}
-	def addInput(in : TransactionInput) = {_inputs += in}
+	def addOutput(out : TransactionOutput) = {
+	  _outputs += out
+	  addOutputCount(1)
+	}
+	def addInput(in : TransactionInput) = {
+	  _inputs += in
+	  addInputCount(1)
+	}
 	def addInputCount(toAdd : Int) = {_inputCount += toAdd}
 	def addOutputCount(toAdd : Int) = {_outputCount += toAdd}
 	

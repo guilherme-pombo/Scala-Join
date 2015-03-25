@@ -28,7 +28,7 @@ object Wallet {
    
    //List most recent confirmed transaction
    def listTransaction(): String = {
-     v("bitcoin-cli -regtest setgenerate true \"\" 1")
+     v("bitcoin-cli -regtest listtransactions \"\" 1")
    }
    
    //List unspent Inputs and Outputs
@@ -109,7 +109,7 @@ object Wallet {
    //Sends a signed transaction to the network
    //returns transaction id
    def sendTransaction(hex : String) : String = {
-     v("bitcoin-cli -regtest sendrawtransaction " + hex)
+     v("bitcoin-cli -regtest sendrawtransaction " + hex + " true")
    }
    
    //check if wallet has been paid

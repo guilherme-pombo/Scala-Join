@@ -4,23 +4,23 @@ package transaction
 import misc.Tools
 
 class TransactionInput(transactionHash :Array[Short], transactionIndex : Long, 
-    scriptLength : Long, scriptData : Array[Short], sequenceNumber : Long, data : Array[Short]) {
+    _scriptLength : Long, scriptData : Array[Short], sequenceNumber : Long, data : Array[Short]) {
 
 	var scriptD = scriptData
+	var scriptLength = _scriptLength
 	
 	def getPrevHash = transactionHash
 	def getIndex = transactionIndex
 	def getScriptLen = scriptLength
 	def getSeqNum = sequenceNumber
-	
+	def getDataArray = data
 	def getScript = scriptD
 	def setScript(script : Array[Short]){
-	  scriptD = script
+	  scriptD = script.clone()
+	  scriptLength = script.length
 	}
-	
-	//add a scriptSig to the current scriptSig
-	def addScript(script : Array[Short]){
-	  scriptD ++ script
+	def readableScript = {
+	  Tools.shortArrayToHexString(scriptData)
 	}
 	
 	def printInput{

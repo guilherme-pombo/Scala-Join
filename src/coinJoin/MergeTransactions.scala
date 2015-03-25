@@ -56,22 +56,14 @@ object MergeTransactions {
 	  if(transactions.length==0){
 	    println("No transactions inputted")
 	    return null
-	    }
-	  
-	  //Check if the number of inputs and outputs does not exceed the limit
-	  var outputCount = 0
-	  var inputCount = 0
-	  for(t<- transactions){
-	    outputCount += t.getOutputs.length
-	    inputCount += t.getInputs.length
 	  }
-	  
 	  //use these to check for correctness of other transactions in the array
 	  var checkVersion = transactions(0).getTransactionVersion
 	  var checkTime = transactions(0).getTransactionLockTime
 	  //this transaction will have the collated inputs and outputs
 	  var finalTx = new Transaction(checkVersion, 0, new ArrayBuffer[TransactionInput](),
 	     0, new ArrayBuffer[TransactionOutput](), checkTime)
+	  
 	  for(t <- transactions){
 	    if(t.getTransactionLockTime != checkTime){
 	      println("Incompatible lock times in inputted transactions")
@@ -82,28 +74,33 @@ object MergeTransactions {
 	      null //can't merge transactions
 	    }
 	    //Collate outputs
-	    //Duplicate outputs are allowed
-	    //Duplicate inputs are not allowed
-	    for(out <- t.getOutputs){
+	    //Duplicate outputs are allowed --> Implies same Receiver in two different txs
+	    //Duplicate inputs are not allowed --> Implies same money being spent twice
+	    for(out1 <- t.getOutputs){
 	      var alreadyExists = false
-	      for(o <- finalTx.getOutputs){
-	    	//perform deep array comparison
-	        if(out.getScript.deep ==  o.getScript.deep){alreadyExists = true}
+	      for(out2 <- finalTx.getOutputs){
+	        if(areEqualOutputs(out1, out2)){
+	          alreadyExists = true
+	          //increase the value of the finalTx output, because no use in having
+	          //same address twice, just send the sum of the values to the address
+	          out2.addToValue(out1.getValue)
+	        }
 	      }
 	      if(!alreadyExists){
-	        finalTx.addOutput(out)
-	        finalTx.addOutputCount(1)
+	        finalTx.addOutput(new TransactionOutput(out1.value, out1.getScriptLength,
+	            out1.getScript, out1.getDataArray))
 	      }
 	    }
 	    //Collate inputs
-	    for(in <- t.getInputs){
+	    for(in1 <- t.getInputs){
 	      var alreadyExists = false
-	      for(i <- finalTx.getInputs){
-	        if(areEqualInputs(in,i)){alreadyExists = true}
+	      for(in2 <- finalTx.getInputs){
+	        if(areEqualInputs(in1,in2)){alreadyExists = true}
 	      }
 	      if(!alreadyExists){
-	        finalTx.addInput(in)
-	        finalTx.addInputCount(1)}
+	        finalTx.addInput(new TransactionInput(in1.getPrevHash,in1.getIndex,
+	    	      in1.getScriptLen, new Array[Short](0), in1.getSeqNum, in1.getDataArray))
+	      }
 	      //duplicate input
 	      else{
 	        println("Duplicate inputs found, invalid transaction to merge")
@@ -111,9 +108,9 @@ object MergeTransactions {
 	      }
 	    }
 	  }
-	  //RIGHT NOW I AM NOT RANDOMIZING TO MAKE DEBUGGING EASIER
-	  //NEED TO:
-	  //RANDOMIZE COLLATED INPUTS AND OUTPUTS
+	  //Shuffle inputs and outputs using Scala's shuffle
+	  util.Random.shuffle(finalTx.getInputs)
+	  util.Random.shuffle(finalTx.getOutputs)
 	  finalTx
 	}
 	
@@ -128,65 +125,58 @@ object MergeTransactions {
 	  }
 	  //this transaction will have the collated scriptSigs
 	  var finalTx = transactions(0) //first transaction serves as checker
+	  var finalOuts = finalTx.getOutputs //checker transaction's outputs
+	  var finalIns = finalTx.getInputs //checker transaction's inputs
 	  var checkVersion = finalTx.getTransactionVersion
 	  var checkTime = finalTx.getTransactionLockTime
-	  for(i<- 0 to transactions.length-2){
-	    var tx1 = transactions(i)
-	    var tx2 = transactions(i+1)
-	    if(tx1.getTransactionLockTime != checkTime){
+	  for(i<- 0 to transactions.length-1){
+	    var check = transactions(i)
+	    if(check.getTransactionLockTime != checkTime){
 	      println("Incompatible lock times in inputted transactions")
 	      null //can't merge transactions
 	    }
-	    if(tx1.getTransactionVersion!=checkVersion){
+	    if(check.getTransactionVersion!=checkVersion){
 	      println("Incompatible transaction version in inputted transactions")
 	      null //can't merge transactions
 	    }
 	    //Check outputs
 	    //if different number of outputs don't even bother checking
-	    if(tx1.getOutputs.length != tx2.getOutputs.length){
-	      println("Incompatible outputs on transactions " + i + " and " +  (i+1))
+	    if(check.getOutputs.length != finalOuts.length){
+	      println("Incompatible outputs on transactions " + i)
 	      return null
 	    }
-	    var outs1 = tx1.getOutputs
-	    var outs2 = tx2.getOutputs
-	    //VERIFY IF ALL OUTPUTS MATCH
-	    for(j <- 0 to outs1.length -1){
-	      var out1 = outs1(j)
-	      var out2 = outs2(j)
+	    var outs = check.getOutputs
+	    //VERIFY IF ALL OUTPUTS MATCH AND ARE IN THE SAME ORDER
+	    for(j <- 0 to outs.length -1){
+	      var out1 = outs(j)
+	      var out2 = finalOuts(j) //final Tx out
           if(!areEqualOutputs(out1, out2)){
-	         println("Outputs number: " + j + " do not match")
+	         println("Outputs number: " + j + " does not match")
 	         return null //can't merge transactions
 	      }
         }
         //Check inputs
 	    //if different number of inputs don't even bother checking
-	    if(tx1.getInputs.length != tx2.getInputs.length){
+	    if(check.getInputs.length != finalIns.length){
 	      println("Incompatible input on transactions " + i + " and " +  (i+1))
 	      return null
 	    }
-	    var ins1 = tx1.getInputs
-	    var ins2 = tx2.getInputs
-	    //VERIFY IF ALL INPUTS MATCH
-	    for(j <- 0 to ins1.length -1){
-	      var in1 = ins1(j)
-	      var in2 = ins2(j)
+	    var ins = check.getInputs
+	    //VERIFY IF ALL INPUTS MATCH AND ARE IN ORDER
+	    for(j <- 0 to ins.length -1){
+	      var in1 = ins(j)
+	      var in2 = finalIns(j) //Final Tx input
           if(!areEqualInputs(in1, in2)){
 	         println("Inputs number: " + j + " do not match")
 	         return null //can't merge transactions
 	      }
-	      //COLLATE ALL SCRIPTSIGS
-//          else{
-//            //if there is an input script copy it over to the next input
-//	    	if(in1.getScript.length>0){
-//	    	  finalTx.getInputs(j).addScript(in1.getScript)
-//	    	}
-//	        //in the last iteration add the second input's scriptSig as well
-//	        if(i == transactions.length-2){
-//	          if(in2.getScript.length>0){
-//	    	  finalTx.getInputs(j).addScript(in2.getScript)
-//	          }
-//	        }
-//	      }
+	      //COPY ALL SCRIPTSIGS
+          else{
+	    	if(in1.getScript.length>0){
+	    	  finalTx.getInputs(j) = new TransactionInput(in2.getPrevHash,in2.getIndex,
+	    	      in1.getScriptLen, in1.getScript, in2.getSeqNum, in2.getDataArray)
+	    	}
+	      }
         }
 	  }
 	  finalTx
