@@ -26,9 +26,9 @@ object Wallet {
      p("bitcoin-cli -regtest setgenerate true 1")
    }
    
-   //List most recent confirmed transaction
-   def listTransaction(): String = {
-     v("bitcoin-cli -regtest listtransactions \"\" 1")
+   //List N most recent confirmed transaction
+   def listTransactions(N : Int): String = {
+     v("bitcoin-cli -regtest listtransactions \"\" " + N)
    }
    
    //List unspent Inputs and Outputs
@@ -112,9 +112,5 @@ object Wallet {
      v("bitcoin-cli -regtest sendrawtransaction " + hex + " true")
    }
    
-   //check if wallet has been paid
-   def listTransactions() : String = {
-      v("bitcoind listtransactions \"\" 1")
-   }
    
 }

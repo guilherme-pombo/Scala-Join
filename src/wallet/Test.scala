@@ -5,7 +5,7 @@ import scala.collection.mutable.ArrayBuffer
 object Test {
 
   def main(args: Array[String]) {
-    test1Send
+    test2Send(10)
   }
   
   //A few sample tests bellow
